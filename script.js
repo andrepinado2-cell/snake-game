@@ -148,17 +148,24 @@ function maintainFoods() {
   }
 }
 
-function drawCell(cell, color, inset = 1) {
+function drawCell(cell, color, inset = 1, glow = 0) {
   const size = grid - inset * 2;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = glow;
   ctx.fillStyle = color;
   ctx.fillRect(cell.x * grid + inset, cell.y * grid + inset, size, size);
+  ctx.shadowBlur = 0;
 }
 
 function draw() {
-  ctx.fillStyle = "#151a19";
+  const boardGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  boardGradient.addColorStop(0, "#071012");
+  boardGradient.addColorStop(0.5, "#08181b");
+  boardGradient.addColorStop(1, "#0b101d");
+  ctx.fillStyle = boardGradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = "rgba(255,255,255,0.035)";
+  ctx.strokeStyle = "rgba(85, 230, 255, 0.075)";
   ctx.lineWidth = 1;
   for (let i = 0; i <= cells; i += 1) {
     ctx.beginPath();
@@ -172,19 +179,19 @@ function draw() {
   }
 
   snake.forEach((part, index) => {
-    drawCell(part, index === 0 ? "#8edb63" : "#4f9e38", 2);
+    drawCell(part, index === 0 ? "#b8ff7a" : "#35d67f", 2, index === 0 ? 16 : 8);
   });
-  obstacles.forEach((part) => drawCell(part, "#6e7781", 1));
+  obstacles.forEach((part) => drawCell(part, "#8ea2b8", 1, 8));
 
   if (modeSelect.value === "portal") {
     portalPair.forEach((portal) => {
-      drawCell(portal, "#b46cff", 1);
+      drawCell(portal, "#b46cff", 1, 18);
       drawCell(portal, "#151a19", 6);
     });
   }
 
   foods.forEach((food) => {
-    drawCell(food, food.special ? "#ff9f1c" : "#ffcf48", food.special ? 2 : 3);
+    drawCell(food, food.special ? "#ff9f1c" : "#ffe45c", food.special ? 2 : 3, food.special ? 18 : 10);
   });
 }
 
