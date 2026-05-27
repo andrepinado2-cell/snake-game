@@ -10,6 +10,8 @@ const pauseBtn = document.querySelector("#pauseBtn");
 const speedSelect = document.querySelector("#speedSelect");
 const modeSelect = document.querySelector("#modeSelect");
 const foodSelect = document.querySelector("#foodSelect");
+const foodCount = document.querySelector("#foodCount");
+const foodCountValue = document.querySelector("#foodCountValue");
 
 const grid = 20;
 const cells = canvas.width / grid;
@@ -56,13 +58,12 @@ const directions = {
 };
 
 let snake;
-let food;
+let foods = [];
 let dir;
 let nextDir;
 let directionQueue = [];
 let score;
 let obstacles = [];
-let specialFood = false;
 let best = Number(localStorage.getItem(bestKey) || 0);
 let timer = null;
 let running = false;
@@ -81,9 +82,9 @@ function resetGame() {
   directionQueue = [];
   score = 0;
   obstacles = getObstacles();
-  specialFood = false;
+  foods = [];
   scoreEl.textContent = score;
-  food = placeFood();
+  maintainFoods();
   draw();
 }
 
@@ -98,19 +99,53 @@ function isSameCell(a, b) {
 }
 
 function isBlocked(cell) {
-  return snake.some((part) => isSameCell(part, cell)) || obstacles.some((part) => isSameCell(part, cell));
+  return (
+    snake.some((part) => isSameCell(part, cell)) ||
+    obstacles.some((part) => isSameCell(part, cell)) ||
+    foods.some((part) => isSameCell(part, cell))
+  );
+}
+
+function getAvailableFoodCells() {
+  const available = [];
+  for (let x = 0; x < cells; x += 1) {
+    for (let y = 0; y < cells; y += 1) {
+      const cell = { x, y };
+      const isPortal = modeSelect.value === "portal" && portalPair.some((portal) => isSameCell(portal, cell));
+      if (!isPortal && !isBlocked(cell)) {
+        available.push(cell);
+      }
+    }
+  }
+  return available;
+}
+
+function getDesiredFoodCount() {
+  return Math.min(Number(foodCount.value), foods.length + getAvailableFoodCells().length);
+}
+
+function makeFood(cell) {
+  return {
+    ...cell,
+    special: foodSelect.value === "golden" || (foodSelect.value === "mystery" && Math.random() < 0.35),
+  };
 }
 
 function placeFood() {
-  let nextFood;
-  do {
-    nextFood = {
-      x: Math.floor(Math.random() * cells),
-      y: Math.floor(Math.random() * cells),
-    };
-  } while (isBlocked(nextFood) || portalPair.some((portal) => isSameCell(portal, nextFood)));
-  specialFood = foodSelect.value === "golden" || (foodSelect.value === "mystery" && Math.random() < 0.35);
-  return nextFood;
+  const available = getAvailableFoodCells();
+  if (available.length === 0) return null;
+  return makeFood(available[Math.floor(Math.random() * available.length)]);
+}
+
+function maintainFoods() {
+  const desired = getDesiredFoodCount();
+  foods = foods.slice(0, desired);
+
+  while (foods.length < desired) {
+    const nextFood = placeFood();
+    if (!nextFood) break;
+    foods.push(nextFood);
+  }
 }
 
 function drawCell(cell, color, inset = 1) {
@@ -148,7 +183,9 @@ function draw() {
     });
   }
 
-  drawCell(food, specialFood ? "#ff9f1c" : "#ffcf48", specialFood ? 2 : 3);
+  foods.forEach((food) => {
+    drawCell(food, food.special ? "#ff9f1c" : "#ffcf48", food.special ? 2 : 3);
+  });
 }
 
 function setOverlay(title, text, buttonText = "Iniciar") {
@@ -213,7 +250,8 @@ function tick() {
   }
 
   const hitWall = outside && modeSelect.value !== "wrap";
-  const ateFood = isSameCell(newHead, food);
+  const foodIndex = foods.findIndex((item) => isSameCell(item, newHead));
+  const ateFood = foodIndex >= 0;
   const snakeBody = ateFood ? snake : snake.slice(0, -1);
   const hitSnake = snakeBody.some((part) => isSameCell(part, newHead));
   const hitObstacle = obstacles.some((part) => isSameCell(part, newHead));
@@ -225,18 +263,19 @@ function tick() {
 
   snake.unshift(newHead);
   if (ateFood) {
-    score += specialFood ? 30 : 10;
+    const eatenFood = foods.splice(foodIndex, 1)[0];
+    score += eatenFood.special ? 30 : 10;
     scoreEl.textContent = score;
     if (score > best) {
       best = score;
       localStorage.setItem(bestKey, String(best));
       bestEl.textContent = best;
     }
-    food = placeFood();
   } else {
     snake.pop();
   }
 
+  maintainFoods();
   draw();
 }
 
@@ -333,6 +372,12 @@ speedSelect.addEventListener("change", () => {
   if (running && !paused) startLoop();
 });
 
+foodCount.addEventListener("input", () => {
+  foodCountValue.textContent = foodCount.value;
+  maintainFoods();
+  draw();
+});
+
 [modeSelect, foodSelect].forEach((select) => {
   select.addEventListener("change", () => {
     if (running) {
@@ -348,4 +393,5 @@ speedSelect.addEventListener("change", () => {
   });
 });
 
+foodCountValue.textContent = foodCount.value;
 resetGame();
