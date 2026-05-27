@@ -59,6 +59,7 @@ let snake;
 let food;
 let dir;
 let nextDir;
+let directionQueue = [];
 let score;
 let obstacles = [];
 let specialFood = false;
@@ -77,6 +78,7 @@ function resetGame() {
   ];
   dir = directions.right;
   nextDir = directions.right;
+  directionQueue = [];
   score = 0;
   obstacles = getObstacles();
   specialFood = false;
@@ -163,13 +165,33 @@ function hideOverlay() {
 function setDirection(newDir) {
   const candidate = directions[newDir];
   if (!candidate) return;
-  const reversing = candidate.x + dir.x === 0 && candidate.y + dir.y === 0;
-  if (!reversing) {
-    nextDir = candidate;
+  const lastQueuedDir = directionQueue[directionQueue.length - 1] || nextDir;
+  const reversing = candidate.x + lastQueuedDir.x === 0 && candidate.y + lastQueuedDir.y === 0;
+  const repeated = candidate.x === lastQueuedDir.x && candidate.y === lastQueuedDir.y;
+
+  if (!reversing && !repeated) {
+    directionQueue.push(candidate);
+  }
+
+  if (directionQueue.length > 2) {
+    directionQueue = directionQueue.slice(-2);
   }
 }
 
+function consumeDirection() {
+  if (directionQueue.length === 0) return nextDir;
+
+  const candidate = directionQueue.shift();
+  const reversing = candidate.x + dir.x === 0 && candidate.y + dir.y === 0;
+  if (!reversing) {
+    return candidate;
+  }
+
+  return nextDir;
+}
+
 function tick() {
+  nextDir = consumeDirection();
   dir = nextDir;
   const head = snake[0];
   const newHead = { x: head.x + dir.x, y: head.y + dir.y };
