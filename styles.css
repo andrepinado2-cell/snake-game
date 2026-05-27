@@ -33,7 +33,8 @@ body {
 }
 
 button,
-select {
+select,
+input {
   font: inherit;
 }
 
@@ -212,6 +213,21 @@ select {
   padding: 0 34px 0 12px;
 }
 
+.range-label {
+  min-width: 210px;
+}
+
+.range-label span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--snake);
+}
+
 .pad {
   display: grid;
   grid-template-columns: repeat(3, 48px);
@@ -275,7 +291,8 @@ select {
     grid-column: 1 / -1;
   }
 
-  .select-label select {
+  .select-label select,
+  .range-label {
     width: 100%;
   }
 }
