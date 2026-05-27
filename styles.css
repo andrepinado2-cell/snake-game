@@ -1,19 +1,21 @@
 :root {
   color-scheme: dark;
-  --bg: #111315;
-  --panel: #1b1f22;
-  --panel-2: #242a2e;
-  --line: #394146;
-  --text: #f4f6f2;
-  --muted: #aeb8ae;
-  --snake: #8edb63;
-  --snake-dark: #4f9e38;
-  --food: #ffcf48;
+  --bg: #070a12;
+  --panel: rgba(10, 16, 28, 0.78);
+  --panel-2: rgba(14, 25, 43, 0.92);
+  --line: rgba(120, 238, 255, 0.18);
+  --text: #f7fbff;
+  --muted: #9eb7c7;
+  --snake: #8cff6b;
+  --snake-dark: #2ccf70;
+  --food: #ffe45c;
   --food-gold: #ff9f1c;
-  --wall: #6e7781;
+  --wall: #7f8ea3;
   --portal: #b46cff;
-  --danger: #f16d62;
-  --accent: #53b7d8;
+  --danger: #ff4d75;
+  --accent: #55e6ff;
+  --accent-2: #a877ff;
+  --accent-3: #ff4fd8;
 }
 
 * {
@@ -24,12 +26,81 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(83, 183, 216, 0.18), transparent 34rem),
-    linear-gradient(145deg, #111315 0%, #171b18 52%, #101416 100%);
+    linear-gradient(115deg, rgba(85, 230, 255, 0.12), transparent 34%),
+    linear-gradient(245deg, rgba(255, 79, 216, 0.11), transparent 38%),
+    linear-gradient(180deg, #070a12 0%, #0b1020 45%, #070a12 100%);
+  background-size: 180% 180%, 180% 180%, 100% 100%;
+  animation: skylineShift 14s ease-in-out infinite alternate;
   color: var(--text);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+}
+
+body::before {
+  background:
+    linear-gradient(rgba(85, 230, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(85, 230, 255, 0.04) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 72%);
+  animation: gridDrift 24s linear infinite;
+}
+
+body::after {
+  background: linear-gradient(transparent 50%, rgba(255, 255, 255, 0.025) 50%);
+  background-size: 100% 4px;
+  mix-blend-mode: screen;
+  opacity: 0.5;
+}
+
+@keyframes skylineShift {
+  from {
+    background-position: 0% 50%, 100% 50%, center;
+  }
+
+  to {
+    background-position: 100% 50%, 0% 50%, center;
+  }
+}
+
+@keyframes gridDrift {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(42px);
+  }
+}
+
+@keyframes borderFlow {
+  from {
+    background-position: 0% 50%;
+  }
+
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 18px rgba(85, 230, 255, 0.22), 0 22px 70px rgba(0, 0, 0, 0.42);
+  }
+
+  50% {
+    box-shadow: 0 0 34px rgba(168, 119, 255, 0.34), 0 26px 82px rgba(0, 0, 0, 0.5);
+  }
 }
 
 button,
@@ -43,18 +114,38 @@ input {
   min-height: 100vh;
   place-items: center;
   padding: 24px;
+  position: relative;
+  z-index: 1;
 }
 
 .game {
+  position: relative;
   width: min(100%, 840px);
+  isolation: isolate;
+}
+
+.game::before {
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: 8px;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2), var(--accent-3), var(--snake));
+  background-size: 280% 280%;
+  filter: blur(18px);
+  opacity: 0.42;
+  content: "";
+  animation: borderFlow 8s ease-in-out infinite alternate;
 }
 
 .topbar,
 .controls,
 .board-wrap {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(27, 31, 34, 0.88);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 42%),
+    var(--panel);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(18px);
 }
 
 .topbar {
@@ -62,7 +153,7 @@ input {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 20px;
+  padding: 20px 22px;
   border-radius: 8px 8px 0 0;
 }
 
@@ -73,6 +164,7 @@ input {
   font-weight: 800;
   letter-spacing: 0;
   text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(85, 230, 255, 0.7);
 }
 
 h1,
@@ -82,8 +174,14 @@ p {
 }
 
 h1 {
-  font-size: clamp(2rem, 7vw, 4rem);
+  font-size: 4rem;
   line-height: 0.95;
+  color: transparent;
+  background: linear-gradient(90deg, #ffffff, var(--accent), var(--snake), #ffffff);
+  background-size: 220% 100%;
+  background-clip: text;
+  text-shadow: 0 0 32px rgba(85, 230, 255, 0.16);
+  animation: borderFlow 7s ease-in-out infinite alternate;
 }
 
 .scores {
@@ -94,10 +192,13 @@ h1 {
 .scores div {
   min-width: 86px;
   padding: 10px 12px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(85, 230, 255, 0.24);
   border-radius: 8px;
-  background: var(--panel-2);
+  background:
+    linear-gradient(180deg, rgba(85, 230, 255, 0.12), transparent),
+    var(--panel-2);
   text-align: right;
+  box-shadow: inset 0 0 18px rgba(85, 230, 255, 0.05), 0 0 18px rgba(85, 230, 255, 0.1);
 }
 
 .scores span {
@@ -109,6 +210,8 @@ h1 {
 .scores strong {
   display: block;
   font-size: 1.5rem;
+  color: var(--snake);
+  text-shadow: 0 0 16px rgba(140, 255, 107, 0.54);
 }
 
 .board-wrap {
@@ -117,6 +220,7 @@ h1 {
   place-items: center;
   padding: clamp(10px, 2vw, 18px);
   border-top: 0;
+  animation: pulseGlow 5s ease-in-out infinite;
 }
 
 canvas {
@@ -124,8 +228,11 @@ canvas {
   width: min(100%, 520px);
   aspect-ratio: 1;
   border-radius: 8px;
-  background: #151a19;
-  outline: 1px solid rgba(255, 255, 255, 0.1);
+  background: #071010;
+  outline: 1px solid rgba(85, 230, 255, 0.28);
+  box-shadow:
+    inset 0 0 38px rgba(85, 230, 255, 0.08),
+    0 0 28px rgba(85, 230, 255, 0.2);
 }
 
 .overlay {
@@ -137,9 +244,13 @@ canvas {
   gap: 12px;
   padding: 20px;
   border-radius: 8px;
-  background: rgba(12, 15, 14, 0.76);
+  background:
+    linear-gradient(135deg, rgba(85, 230, 255, 0.16), transparent 40%),
+    linear-gradient(225deg, rgba(255, 79, 216, 0.12), transparent 38%),
+    rgba(4, 8, 15, 0.82);
   text-align: center;
   transition: opacity 160ms ease, visibility 160ms ease;
+  backdrop-filter: blur(10px);
 }
 
 .overlay.hidden {
@@ -148,7 +259,8 @@ canvas {
 }
 
 .overlay h2 {
-  font-size: clamp(1.6rem, 5vw, 3rem);
+  font-size: 3rem;
+  text-shadow: 0 0 22px rgba(85, 230, 255, 0.42);
 }
 
 .overlay p {
@@ -179,30 +291,40 @@ canvas {
 button,
 select {
   min-height: 44px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(85, 230, 255, 0.22);
   border-radius: 8px;
-  background: #20262a;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), transparent),
+    rgba(10, 20, 34, 0.9);
   color: var(--text);
+  box-shadow: inset 0 0 16px rgba(85, 230, 255, 0.04);
 }
 
 button {
   cursor: pointer;
   padding: 0 18px;
   font-weight: 800;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 }
 
 button:hover,
 button:focus-visible,
 select:focus-visible {
   border-color: var(--accent);
-  outline: 2px solid rgba(83, 183, 216, 0.25);
+  outline: 2px solid rgba(85, 230, 255, 0.22);
   outline-offset: 2px;
+  box-shadow: 0 0 22px rgba(85, 230, 255, 0.2), inset 0 0 18px rgba(85, 230, 255, 0.09);
+}
+
+button:hover {
+  transform: translateY(-1px);
 }
 
 .primary {
   border-color: transparent;
-  background: var(--snake);
-  color: #12210f;
+  background: linear-gradient(90deg, var(--snake), var(--accent));
+  color: #06100d;
+  box-shadow: 0 0 28px rgba(140, 255, 107, 0.36);
 }
 
 .select-label {
@@ -211,10 +333,25 @@ select:focus-visible {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 700;
+  text-shadow: 0 0 12px rgba(85, 230, 255, 0.18);
 }
 
 select {
   padding: 0 34px 0 12px;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+    linear-gradient(135deg, var(--accent) 50%, transparent 50%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), transparent);
+  background-position:
+    calc(100% - 18px) 19px,
+    calc(100% - 12px) 19px,
+    0 0;
+  background-size:
+    6px 6px,
+    6px 6px,
+    100% 100%;
+  background-repeat: no-repeat;
 }
 
 .range-label {
@@ -231,6 +368,7 @@ input[type="range"] {
   min-width: 0;
   width: 100%;
   accent-color: var(--snake);
+  filter: drop-shadow(0 0 8px rgba(140, 255, 107, 0.24));
 }
 
 .pad {
@@ -245,6 +383,8 @@ input[type="range"] {
   min-height: 48px;
   padding: 0;
   font-size: 1.15rem;
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(85, 230, 255, 0.8);
 }
 
 .pad button[data-dir="up"] {
@@ -276,6 +416,18 @@ input[type="range"] {
   .controls {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .topbar {
+    padding: 18px;
+  }
+
+  h1 {
+    font-size: 3rem;
+  }
+
+  .overlay h2 {
+    font-size: 2rem;
   }
 
   .scores div {
