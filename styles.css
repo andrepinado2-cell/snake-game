@@ -172,6 +172,10 @@ canvas {
   gap: 10px;
 }
 
+.action-row > * {
+  min-width: 0;
+}
+
 button,
 select {
   min-height: 44px;
@@ -224,6 +228,7 @@ select {
 }
 
 input[type="range"] {
+  min-width: 0;
   width: 100%;
   accent-color: var(--snake);
 }
@@ -287,12 +292,14 @@ input[type="range"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .action-row button {
+  .action-row button,
+  .range-label {
     grid-column: 1 / -1;
   }
 
   .select-label select,
   .range-label {
+    min-width: 0;
     width: 100%;
   }
 }
